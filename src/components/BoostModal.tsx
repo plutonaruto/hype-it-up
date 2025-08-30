@@ -12,7 +12,7 @@ const BoostModal: React.FC<BoostModalProps> = ({ video, onClose, onBoost }) => {
   const [selectedTab, setSelectedTab] = useState<'info' | 'donate' | 'community'>('info');
   const [donationAmount, setDonationAmount] = useState(5);
 
-  const donationOptions = [1, 5, 10, 25, 50, 100];
+  const donationOptions = [0.1, 0.5, 1, 5, 10, 20];
 
   return (
     <div className="absolute inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Heart, MessageCircle, Share, MoreHorizontal, Plus, Zap } from 'lucide-react';
-import type { VideoData } from '../types';
-import ContextCard from './ContextCard.js';
+import { VideoData } from '../types';
+import ContextCard from './ContextCard';
 
 interface VideoFeedProps {
   onCreateFundraiser: () => void;
@@ -44,7 +44,8 @@ const VideoFeed: React.FC<VideoFeedProps> = ({ onCreateFundraiser, onBoost }) =>
       impact: {
         reachIncrease: 340,
         donationsToday: 1200,
-        totalReach: 45600
+        totalReach: 45600,
+        communityBoosts: 150
       }
     },
     {

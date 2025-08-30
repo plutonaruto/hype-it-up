@@ -30,7 +30,7 @@ export interface VideoData {
     reachIncrease: number;
     donationsToday: number;
     totalReach: number;
-    communityBoosts?: number;
+    communityBoosts: number;
   };
 }
 

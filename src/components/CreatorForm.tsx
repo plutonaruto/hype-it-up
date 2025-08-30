@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Upload, DollarSign, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Upload, DollarSign, ExternalLink, X } from 'lucide-react';
 
 interface CreatorFormProps {
   onSubmit: (formData: any) => void;
@@ -17,6 +17,26 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ onSubmit, onBack }) => {
   });
 
   const [step, setStep] = useState(1);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({...formData, videoFile: file});
+      
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setVideoPreview(previewUrl);
+    }
+  };
+
+  const removeVideo = () => {
+    setFormData({...formData, videoFile: null});
+    if (videoPreview) {
+      URL.revokeObjectURL(videoPreview);
+      setVideoPreview(null);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,17 +85,69 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ onSubmit, onBack }) => {
             <div className="space-y-6">
               <h2 className="text-white text-xl font-bold">Upload Your Video</h2>
               
-              <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center">
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-white mb-2">Tap to upload video</p>
-                <p className="text-gray-400 text-sm">MP4, MOV up to 10MB</p>
-                <input 
-                  type="file" 
-                  accept="video/*" 
-                  className="hidden"
-                  onChange={(e) => setFormData({...formData, videoFile: e.target.files?.[0] || null})}
-                />
-              </div>
+              {!formData.videoFile ? (
+                <label className="block cursor-pointer">
+                  <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-pink-500 transition-colors">
+                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-white mb-2">Tap to upload video</p>
+                    <p className="text-gray-400 text-sm">MP4, MOV up to 50MB</p>
+                  </div>
+                  <input 
+                    type="file" 
+                    accept="video/*" 
+                    className="hidden"
+                    onChange={handleVideoUpload}
+                  />
+                </label>
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-gray-800 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-pink-500 rounded-lg flex items-center justify-center">
+                          <Upload className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">{formData.videoFile.name}</p>
+                          <p className="text-gray-400 text-sm">
+                            {(formData.videoFile.size / (1024 * 1024)).toFixed(1)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={removeVideo}
+                        className="text-red-400 hover:text-red-300"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    
+                    {videoPreview && (
+                      <div className="relative rounded-lg overflow-hidden">
+                        <video 
+                          src={videoPreview}
+                          className="w-full h-48 object-cover bg-gray-900"
+                          controls
+                          muted
+                        />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <label className="block cursor-pointer">
+                    <div className="border border-gray-600 rounded-lg p-4 text-center hover:border-pink-500 transition-colors">
+                      <p className="text-gray-400 text-sm">Upload different video</p>
+                    </div>
+                    <input 
+                      type="file" 
+                      accept="video/*" 
+                      className="hidden"
+                      onChange={handleVideoUpload}
+                    />
+                  </label>
+                </div>
+              )}
 
               <div>
                 <label className="block text-white text-sm font-medium mb-2">Video Title</label>
@@ -102,7 +174,7 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ onSubmit, onBack }) => {
               <button 
                 type="button"
                 onClick={() => setStep(2)}
-                disabled={!formData.title || !formData.description}
+                disabled={!formData.title || !formData.description || !formData.videoFile}
                 className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue
@@ -191,6 +263,10 @@ const CreatorForm: React.FC<CreatorFormProps> = ({ onSubmit, onBack }) => {
                 <div>
                   <span className="text-gray-400 text-sm">Title:</span>
                   <p className="text-white">{formData.title}</p>
+                </div>
+                <div>
+                  <span className="text-gray-400 text-sm">Video:</span>
+                  <p className="text-white">{formData.videoFile?.name}</p>
                 </div>
                 <div>
                   <span className="text-gray-400 text-sm">Goal:</span>
