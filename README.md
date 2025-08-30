@@ -151,3 +151,21 @@ Title “Help dog get food”, Description “Layla has rare illness…”, Cate
 - Donation links open externally in the user’s browser.
 
 - AI runs locally in the browser; no user text/video leaves the device for verification (except when you explicitly visit external donation links).
+
+# APIs, libraries & assets
+
+- React, TypeScript, Vite
+
+- Tailwind CSS, lucide-react
+
+- Transformers.js
+
+- Xenova/distilbert-base-cased-distilled-squad (QA)
+
+- Xenova/distilbart-cnn-6-6 (Summarization)
+
+- tesseract.js (OCR)
+
+- Stock media: Pexels (placeholders in mock feed)
+
+No third-party trademarks or copyrighted music are used.
