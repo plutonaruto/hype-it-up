@@ -37,12 +37,12 @@ const ContextCard: React.FC<ContextCardProps> = ({ fundraiser, impact, onClose }
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center space-x-3">
-            <div className={`w-8 h-8 bg-gradient-to-r ${getTierColor(fundraiser.tier)} rounded-full flex items-center justify-center`}>
-              <span className="text-xs">{getTierIcon(fundraiser.tier)}</span>
+            <div className={`w-8 h-8 bg-gradient-to-r ${getTierColor(fundraiser.hypeTier)} rounded-full flex items-center justify-center`}>
+              <span className="text-xs">{getTierIcon(fundraiser.hypeTier)}</span>
             </div>
             <div>
               <h3 className="text-white font-semibold">Verified Fundraiser</h3>
-              <p className="text-gray-400 text-xs">{fundraiser.tier.toUpperCase()} Tier</p>
+              <p className="text-gray-400 text-xs">{fundraiser.hypeTier.toUpperCase()} Tier</p>
             </div>
           </div>
           <button onClick={onClose} className="text-gray-400">

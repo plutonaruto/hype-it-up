@@ -1,107 +1,109 @@
-import { useState } from 'react';
-import PhoneContainer from './components/PhoneContainer';
+// src/App.tsx
+import { useEffect, useState } from 'react';
 import VideoFeed from './components/VideoFeed';
-import CreatorForm from './components/CreatorForm';
-import VerificationStatus from './components/VerificationStatus';
+import CreatorScreen from './screens/CreatorScreen';
 import BoostModal from './components/BoostModal';
 import ImpactNotification from './components/ImpactNotification';
-import type { VideoData, VerificationResult } from './types';
+import type { VideoData } from './types';
+import { prewarmModels, verifyClientSide } from './ai/localVerifier';
 
-function App() {
-  const [currentView, setCurrentView] = useState<'feed' | 'creator' | 'verification'>('feed');
-  const [showBoostModal, setShowBoostModal] = useState(false);
-  const [selectedVideo, setSelectedVideo] = useState<VideoData | null>(null);
-  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
-  const [showImpactNotification, setShowImpactNotification] = useState(false);
-  const [impactMessage, setImpactMessage] = useState('');
+export default function App() {
 
-  const handleSubmitFundraiser = async (_formData: any) => {
-    setCurrentView('verification');
+  // useEffect(() => {
+  //   (async () => {
+  //     console.log('[SelfTest] prewarm start');
+  //     await prewarmModels();
+  //     console.log('[SelfTest] prewarm done');
+  //     const out = await verifyClientSide({
+  //       title: 'Emergency Vet Surgery for Mittens',
+  //       description: 'Mittens needs urgent surgery after an accident. We are raising $2500.',
+  //       goals: '$2500',
+  //       category: 'medical',
+  //       fundraiserUrl: 'https://www.gofundme.com/f/help-mittens',
+  //     });
+  //     console.log('[LOCAL VERIFIER SELFTEST]', out);
+  //   })().catch(console.error);
+  // }, []);
 
-    // Simulate AI verification process
-    setTimeout(() => {
-      const isApproved = Math.random() > 0.3; // 70% approval rate
-      setVerificationResult({
-        approved: isApproved,
-        message: isApproved
-          ? "Your fundraiser has been verified! AI analysis confirms legitimate cause and appropriate content."
-          : "Verification incomplete. Please review submission guidelines and try again.",
-        // Use undefined (not null) to satisfy string | undefined
-        aiSummary: isApproved
-          ? "Verified emergency relief campaign for hurricane victims with transparent fund allocation."
-          : undefined,
-      });
-    }, 3000);
+  useEffect(() => {
+    const orig = window.fetch;
+    window.fetch = async (...args) => {
+      const [url, init] = args as [RequestInfo, RequestInit?];
+      console.log('[FETCH]', url, init?.method || 'GET');
+      const res = await orig(...args);
+      console.log('[FETCH:RES]', url, res.status, res.headers.get('content-type'));
+      return res;
+    };
+    return () => { window.fetch = orig; };
+  }, []);
+
+  useEffect (() => {
+    prewarmModels();
+  }, []);
+
+  const [screen, setScreen] = useState<'home' | 'user' | 'creator'>('home');
+  const [activeVideo, setActiveVideo] = useState<VideoData | null>(null);
+  const [showBoost, setShowBoost] = useState(false);
+  const [notif, setNotif] = useState<string | null>(null);
+
+  const openBoost = (video: VideoData) => {
+    setActiveVideo(video);
+    setShowBoost(true);
   };
 
   const handleBoost = (type: 'donate' | 'community', amount?: number) => {
-    setShowBoostModal(false);
-
-    // Use the params to avoid TS6133 and give better UX
-    const tailored =
+    setShowBoost(false);
+    const reach = type === 'donate' ? Math.max(0, Math.round((amount ?? 0) * 200)) : 1000;
+    const msg =
       type === 'donate'
-        ? (amount
-            ? `Your Paid Hype of ${amount} coins unlocked +${Math.floor(
-                160 * (amount / 5)
-              )} projected views.`
-            : "Your Paid Hype boosted projected reach this hour.")
-        : "Your Community Hype helped push this toward the next unlock window.";
-
-    const messages = [
-      tailored,
-      "This campaign raised $1,200 today — enough for 400 meals. Thank you.",
-      "Your support helped increase visibility by 150% in the last hour.",
-      "Thanks to your boost, this fundraiser is trending in your area.",
-    ];
-
-    setImpactMessage(messages[Math.floor(Math.random() * messages.length)]);
-    setShowImpactNotification(true);
-
-    setTimeout(() => setShowImpactNotification(false), 4000);
+        ? `Your Hype added +${reach} projected views.`
+        : `Community support added +${reach} projected views.`;
+    setNotif(msg);
+    setTimeout(() => setNotif(null), 4000);
   };
 
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center p-4">
-      <PhoneContainer>
-        {currentView === 'feed' && (
-          <VideoFeed 
-            onCreateFundraiser={() => setCurrentView('creator')}
-            onBoost={(video) => {
-              setSelectedVideo(video);
-              setShowBoostModal(true);
-            }}
-          />
-        )}
-        
-        {currentView === 'creator' && (
-          <CreatorForm 
-            onSubmit={handleSubmitFundraiser}
-            onBack={() => setCurrentView('feed')}
-          />
-        )}
-        
-        {currentView === 'verification' && (
-          <VerificationStatus 
-            result={verificationResult}
-            onBack={() => setCurrentView('feed')}
-          />
-        )}
-        
-        {showBoostModal && selectedVideo && (
-          <BoostModal 
-            video={selectedVideo}
-            onClose={() => setShowBoostModal(false)}
-            onBoost={handleBoost}
-          />
-        )}
-        
-        {showImpactNotification && (
-          <ImpactNotification message={impactMessage} />
-        )}
-      </PhoneContainer>
+    <div className="min-h-screen w-full bg-gradient-to-br from-pink-600 via-purple-600 to-indigo-700 flex items-center justify-center p-4">
+      <div className="relative w-[390px] h-[780px] sm:w-[420px] sm:h-[880px] rounded-[2rem] bg-black shadow-2xl ring-1 ring-white/10 overflow-hidden">
+        <div className="pointer-events-none absolute left-1/2 top-0 z-50 h-6 w-40 -translate-x-1/2 rounded-b-3xl bg-black" />
+        <div className="absolute inset-0">
+          {screen === 'home' && (
+            <div className="flex h-full flex-col items-center justify-center gap-4 p-6">
+              <h1 className="mb-2 text-3xl font-bold text-white">Hype It Up</h1>
+              <button
+                onClick={() => setScreen('user')}
+                className="rounded-xl bg-white px-5 py-3 font-semibold text-black"
+              >
+                User
+              </button>
+              <button
+                onClick={() => setScreen('creator')}
+                className="rounded-xl bg-gray-800 px-5 py-3 font-semibold text-white"
+              >
+                Creator
+              </button>
+            </div>
+          )}
+
+          {screen === 'user' && (
+            <VideoFeed onCreateFundraiser={() => setScreen('creator')} onBoost={openBoost} />
+          )}
+
+          {screen === 'creator' && <CreatorScreen onClose={() => setScreen('home')} />}
+
+          {showBoost && activeVideo && (
+            <BoostModal
+              video={activeVideo}
+              onClose={() => setShowBoost(false)}
+              onBoost={handleBoost}
+            />
+          )}
+
+          {notif && <ImpactNotification message={notif} />}
+        </div>
+        <div className="absolute -left-1 top-24 h-24 w-1 rounded-r bg-white/10" />
+        <div className="absolute -right-1 top-36 h-16 w-1 rounded-l bg-white/10" />
+      </div>
     </div>
   );
 }
-
-export default App;
