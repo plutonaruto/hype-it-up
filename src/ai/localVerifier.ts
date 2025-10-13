@@ -1,5 +1,4 @@
-// src/ai/localVerifier.ts
-// No-embeddings verifier: OCR + QA + summarizer + contradiction rules + OCR cleanup + cue overlap
+// verifier: OCR + QA + summarizer + contradiction rules + OCR cleanup + cue overlap
 import { pipeline, env } from '@huggingface/transformers';
 
 // ------- Use remote Hugging Face models -------
@@ -40,10 +39,8 @@ async function safeSUM(text: string, max_new_tokens = 96) {
   } catch { return null; }
 }
 
-// ------- Utils -------
 function clean(s: string) { return (s || '').replace(/\s+/g, ' ').trim(); }
 
-// Strip URLs, hashes, punctuation noise; keep letters/spaces; drop tiny tokens
 function cleanOCR(raw: string) {
   if (!raw) return '';
   let t = raw;
