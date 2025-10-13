@@ -2,9 +2,6 @@
 import type { VerificationResult } from '../types';
 import { verifyClientSide } from '../ai/localVerifier';
 
-// NOTE: This file MUST NOT import or call fetch().
-// It simply adapts localVerifier's output to your app's VerificationResult type.
-
 type Payload = {
   title: string;
   description: string;
