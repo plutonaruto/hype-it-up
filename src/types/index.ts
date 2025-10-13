@@ -14,7 +14,7 @@ export interface VideoData {
 
     // Previously "verified" + "tier"
     verified: boolean;             // gate for showing Boost / ContextCard
-    hypeTier: HypeTier;            // your gamified “bronze…platinum”
+    hypeTier: HypeTier;            // gamified “bronze…platinum”
     verificationTier?: VerificationTier; // NGO-Verified | Community-Verified | Awareness
 
     aiSummary?: string;
