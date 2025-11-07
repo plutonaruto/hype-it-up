@@ -5,6 +5,8 @@ There is no in-app fundraising — coins buy visibility only. Donations happen o
 
 Theme: Value sharing reimagined
 
+[Link to Demo](https://devpost.com/software/hype-it-up)
+
 # Getting Started
 
 install deps
